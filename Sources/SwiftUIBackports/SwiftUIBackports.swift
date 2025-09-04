@@ -53,7 +53,7 @@ public extension Backport where Content: View {
 @available(iOS 14, macOS 11, *)
 public extension Backport where Content: View {
     @ViewBuilder func presentationSizeForm() -> some View {
-        if #available(iOS 18, macOS 15, *) {
+        if #available(iOS 18, macOS 15, visionOS 2, *) {
             content.presentationSizing(.form)
         } else {
             content
@@ -79,7 +79,7 @@ public extension Backport where Content: View {
         id: some Hashable,
         in namespace: Namespace.ID
     ) -> some View {
-        if #available(iOS 18.0, macOS 15, *) {
+        if #available(iOS 18.0, macOS 15, visionOS 2, *) {
             content.matchedTransitionSource(id: id, in: namespace)
         } else {
             content
@@ -90,7 +90,7 @@ public extension Backport where Content: View {
         _ presented: Binding<Bool>,
         completion: @escaping (URL?) -> Void
     ) -> some View {
-        if #available(iOS 18.1, macOS 15.1, *) {
+        if #available(iOS 18.1, macOS 15.1, visionOS 2.4, *) {
             if ImagePlaygroundViewController.isAvailable {
                 content
                     .imagePlaygroundSheet(isPresented: presented) { url in
@@ -122,6 +122,7 @@ public enum BackportGlass: Equatable, Sendable {
     }
 }
 
+#if !os(visionOS)
 @available(iOS 26, macOS 26, *)
 extension BackportGlass {
     public var toGlass: Glass {
@@ -141,12 +142,14 @@ extension BackportGlass {
         }
     }
 }
+#endif
 
 public enum BackportGlassEffectTransition: Equatable, Sendable {
     case identity
     case materialize
 }
 
+#if !os(visionOS)
 @available(iOS 26, macOS 26, *)
 public extension BackportGlassEffectTransition {
     var toTransition: GlassEffectTransition {
@@ -158,6 +161,7 @@ public extension BackportGlassEffectTransition {
         }
     }
 }
+#endif
 
 public enum BackportScrollEdgeEffectStyle: Hashable, Sendable {
     case automatic
@@ -249,6 +253,7 @@ public extension Backport where Content: View {
         }
     }
     
+#if !os(visionOS)
     @ViewBuilder func glassEffectTransition(_ transition: BackportGlassEffectTransition) -> some View {
         if #available(iOS 26.0, macOS 26, *) {
             content.glassEffectTransition(transition.toTransition)
@@ -256,22 +261,30 @@ public extension Backport where Content: View {
             content
         }
     }
+    #endif
     
     @ViewBuilder func glassEffect(
         _ backportGlass: BackportGlass = .regular,
         in shape: some Shape = Capsule()
     ) -> some View {
+        #if os(visionOS)
+        content.glassBackgroundEffect()
+        #else
         if #available(iOS 26.0, macOS 26, *) {
             content.glassEffect(backportGlass.toGlass, in: shape)
         } else {
             content.clipShape(shape)
         }
+        #endif
     }
     
     @ViewBuilder func glassEffect(
         _ backportGlass: BackportGlass = .regular,
         in shape: some Shape = Capsule(),
         fallbackBackground: some ShapeStyle) -> some View {
+#if os(visionOS)
+content.glassBackgroundEffect()
+#else
             if #available(iOS 26.0, macOS 26, *) {
                 content.glassEffect(backportGlass.toGlass, in: shape)
             } else {
@@ -281,25 +294,37 @@ public extension Backport where Content: View {
                     content
                 }
             }
+            #endif
         }
 
     @ViewBuilder func glassEffectContainer(spacing: CGFloat? = nil) -> some View {
+#if os(visionOS)
+content.glassBackgroundEffect()
+#else
         if #available(iOS 26.0, macOS 26,  *) {
             GlassEffectContainer(spacing: spacing) { content }
         } else {
             content
         }
+        #endif
     }
 
     @ViewBuilder func glassButtonStyle(fallbackStyle: some PrimitiveButtonStyle = DefaultButtonStyle()) -> some View {
+#if os(visionOS)
+content.glassBackgroundEffect()
+#else
         if #available(iOS 26.0, macOS 26, *) {
             content.buttonStyle(.glass)
         } else {
             content.buttonStyle(fallbackStyle)
         }
+        #endif
     }
 
     @ViewBuilder func glassProminentButtonStyle() -> some View {
+#if os(visionOS)
+content.glassBackgroundEffect()
+#else
         if #available(iOS 26.0, macOS 26, *) {
             content.buttonStyle(.glassProminent)
         } else {
@@ -309,51 +334,68 @@ public extension Backport where Content: View {
                 content
             }
         }
+        #endif
     }
 
     @ViewBuilder func backgroundExtensionEffect() -> some View {
+#if os(visionOS)
+content.glassBackgroundEffect()
+#else
         if #available(iOS 26.0, macOS 26, *) {
             content.backgroundExtensionEffect()
         } else {
             content
         }
+        #endif
     }
     
     @ViewBuilder func scrollEdgeEffectStyle(
         _ style: BackportScrollEdgeEffectStyle?,
         for edges: Edge.Set
     ) -> some View {
-        if #available(iOS 26.0, macOS 26, *) {
+#if os(visionOS)
+content
+#else
+        if #available(iOS 26.0, macOS 26, visionOS 26, *) {
             content.scrollEdgeEffectStyle(style?.toStyle, for: edges)
         } else {
             content
         }
+        #endif
     }
     
     @ViewBuilder func scrollEdgeEffectHidden(
         _ hidden: Bool = true,
         for edges: Edge.Set = .all
     ) -> some View {
+#if os(visionOS)
+content
+#else
         if #available(iOS 26.0, macOS 26, *) {
             content.scrollEdgeEffectHidden(hidden, for: edges)
         } else {
             content
         }
+        #endif
     }
     
     @ViewBuilder func glassEffectID(
         _ id: (some Hashable & Sendable)?,
         in namespace: Namespace.ID
     ) -> some View {
+#if os(visionOS)
+content
+#else
         if #available(iOS 26.0, macOS 26, *) {
             content.glassEffectID(id, in: namespace)
         } else {
             content
         }
+        #endif
     }
     
     @ViewBuilder func symbolColorRenderingMode(_ mode: BackportSymbolColorRenderingMode?) -> some View {
-        if #available(iOS 26.0, macOS 26, *) {
+        if #available(iOS 26.0, macOS 26, visionOS 26, *) {
             content.symbolColorRenderingMode(mode?.toMode)
         } else {
             content
@@ -361,7 +403,7 @@ public extension Backport where Content: View {
     }
     
     @ViewBuilder func symbolVariableValueMode(_ mode: BackportSymbolVariableValueMode?) -> some View {
-        if #available(iOS 26.0, macOS 26, *) {
+        if #available(iOS 26.0, macOS 26, visionOS 26, *) {
             content.symbolVariableValueMode(mode?.toMode)
         } else {
             content
@@ -369,7 +411,7 @@ public extension Backport where Content: View {
     }
     
     @ViewBuilder func tabBarMinimizeBehavior(_ behavior: BackportTabBarMinimizeBehavior) -> some View {
-        if #available(iOS 26.0, macOS 26, *) {
+        if #available(iOS 26.0, macOS 26, visionOS 26, *) {
             content.tabBarMinimizeBehavior(behavior.toBehavior)
         } else {
             content
